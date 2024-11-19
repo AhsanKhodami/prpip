@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="prpip",
-    version="0.1.0",
+    version="0.1.1",
     author="Your Name",
     author_email="your_email@example.com",
     description="A package for reconstructing pupil size and handling eye-tracker blinks.",
