@@ -38,7 +38,7 @@ This approach offers a scientifically grounded and adaptive method for reconstru
 - Added advanced parameter customization (`tau`, `noise_scale`).
 - Improved boundary smoothing for blink transitions.
 
-### **Version 1.2.0**
+### **Version 1.2.1**
 - Introduced additional output format options.
 - Optimized performance for large datasets.
 
