@@ -2,13 +2,6 @@
 ## **prpip**
 **Reconstruct pupil size during blinks in eye-tracking data** with a physiologically inspired approach.
 
-
-## **Why this approach**
-
-This approach offers a scientifically grounded and adaptive method for reconstructing pupil size data during blinks, which is a significant improvement over traditional interpolation techniques. Unlike conventional methods such as linear, spline, or Akima interpolation, which apply a uniform approach to missing data, our model is based on **physiological principles of pupil recovery**. Specifically, we use a **logarithmic recovery model** to simulate the natural recovery process of pupil size following occlusions, such as blinks. This model is grounded in pupillometry research that suggests pupil recovery follows an exponential or logarithmic curve, providing a more biologically plausible reconstruction than standard interpolation methods. Furthermore, our method dynamically adapts to the length of the blink. For **short blinks** (less than 50 ms), the reconstruction uses a **polynomial blending approach** that ensures smooth transitions between pre- and post-blink data. For **longer blinks** (greater than 50 ms), the reconstruction applies a logarithmic recovery model to simulate the gradual recovery of the pupil size, with the addition of **Gaussian noise** proportional to the size difference between pre- and post-blink data. This noise introduces **natural variability** into the reconstructed data, reflecting the inherent fluctuations in pupil size, which are often absent in traditional models that overly smooth the data. Additionally, the method includes **adaptive boundary smoothing**, which minimizes artifacts and ensures continuity at the edges of blink intervals. The ability to adjust key parameters, such as the **recovery time constant** and **noise scale**, further enhances the flexibility and accuracy of this method. Thus, this approach provides a **scientifically sound, biologically informed**, and **adaptive** solution to pupil data reconstruction, making it superior in both realism and accuracy compared to existing interpolation models.
-
-
-
 ### **Features**
 - Automatically detects blink intervals in eye-tracking data.
 - Reconstructs pupil size during blinks using:
@@ -41,6 +34,12 @@ This approach offers a scientifically grounded and adaptive method for reconstru
 ### **Version 1.2.1**
 - Introduced additional output format options.
 - Optimized performance for large datasets.
+
+## **Version 1.2.3**
+- Added a check in detect_blinks to print a message when no blinks are detected in the trial data.
+- Improved handling of floating-point time indices during pupil reconstruction, ensuring compatibility with non-integer time formats.
+- Fixed minor bugs related to batch processing of trials.
+- Improved error messages for invalid inputs, making debugging easier for users.
 
 </details>
 

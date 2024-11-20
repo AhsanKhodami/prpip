@@ -16,14 +16,18 @@ def reconstruct_pupil(trial_data, blink_intervals, tau=50, noise_scale=0.05):
     interpolated_pupil = trial_data['Pupil Size'].copy()
 
     for start, end in blink_intervals:
-        if start >= end or end > len(trial_data):
+        # Convert floating-point indices to positional indices
+        start_idx = trial_data.index.get_loc(start)
+        end_idx = trial_data.index.get_loc(end)
+        
+        if start_idx >= end_idx or end_idx > len(trial_data):
             continue  # Skip invalid intervals
 
-        blink_length = end - start
+        blink_length = end_idx - start_idx
 
         # Pre-blink and post-blink values
-        pre_value = interpolated_pupil[start - 1] if start > 0 else interpolated_pupil.mean()
-        post_value = interpolated_pupil[end] if end < len(interpolated_pupil) else interpolated_pupil.mean()
+        pre_value = interpolated_pupil.iloc[start_idx - 1] if start_idx > 0 else interpolated_pupil.mean()
+        post_value = interpolated_pupil.iloc[end_idx] if end_idx < len(interpolated_pupil) else interpolated_pupil.mean()
 
         # Generate recovery curve
         if blink_length > 50:
@@ -35,7 +39,7 @@ def reconstruct_pupil(trial_data, blink_intervals, tau=50, noise_scale=0.05):
             recovery_curve = pre_value * (1 - t) + post_value * t
 
         # Assign the recovery curve to the blink interval
-        interpolated_pupil.iloc[start:end] = recovery_curve
+        interpolated_pupil.iloc[start_idx:end_idx] = recovery_curve
 
     # Fill NaNs for boundary conditions
     interpolated_pupil = interpolated_pupil.interpolate(method='linear').ffill().bfill()

@@ -21,4 +21,9 @@ def detect_blinks(trial_data, blink_threshold=0):
             blink_intervals.append((start_idx, end_idx))
     if in_blink:
         blink_intervals.append((start_idx, len(trial_data)))
+    
+    # Check if any blinks are detected
+    if not blink_intervals:
+        print("""No blinks detected in the trial data.No changes has applied to the trial data.""")
+    
     return blink_intervals
