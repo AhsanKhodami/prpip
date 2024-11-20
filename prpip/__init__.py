@@ -1,1 +1,1 @@
-from .process import process_eye_tracker_data
+from .process import process_pupil
