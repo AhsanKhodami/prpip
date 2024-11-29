@@ -5,10 +5,10 @@
 ### **Features**
 - Automatically detects blink intervals in eye-tracking data.
 - Reconstructs pupil size during blinks using:
-  - **Logarithmic recovery** for long blinks (>50 ms).
-  - **Linear blending** for short blinks (<50 ms).
-  - Adds **stochastic variability** to mimic natural pupil fluctuations.
-- Processes individual trials or entire datasets.
+  - **Logarithmic recovery** with dynamic adjustment of the recovery time constant (\(\tau\)).
+  - Incorporates **Gaussian noise** to mimic natural variability in pupil size measurements.
+- Validates input data to ensure compatibility and provides clear error messages for invalid inputs.
+- Supports multiple input formats: CSV, Excel, JSON, Parquet, and TXT.
 - Flexible output:
   - Add a new column for reconstructed data.
   - Replace the original pupil size column with reconstructed values.
@@ -35,14 +35,22 @@
 - Introduced additional output format options.
 - Optimized performance for large datasets.
 
-## **Version 1.2.3**
-- Added a check in detect_blinks to print a message when no blinks are detected in the trial data.
+### **Version 1.2.3**
+- Added a check in `detect_blinks` to print a message when no blinks are detected in the trial data.
 - Improved handling of floating-point time indices during pupil reconstruction, ensuring compatibility with non-integer time formats.
 - Fixed minor bugs related to batch processing of trials.
 - Improved error messages for invalid inputs, making debugging easier for users.
 
+### **Version 1.3.0**
+- Unified reconstruction method: removed distinctions between short and long blinks.
+- Added support for multiple file formats: CSV, Excel, JSON, TXT, and Parquet.
+- Incorporated comprehensive input validation to ensure consistent and robust data processing.
+- Enhanced the Gaussian noise model for more realistic reconstruction.
+- Optimized compatibility with `pandas` and modern data workflows.
+
 </details>
 
+---
 
 ### **Installation**
 Install the latest version of `prpip` from PyPI:
@@ -64,23 +72,15 @@ from prpip import process_pupil
 ```python
 import pandas as pd
 
-# Load the dataset
 data = pd.read_csv("input.csv")
-
-# Process all trials in the dataset
 processed_data = process_pupil(data)
-
-# Save the processed data
 processed_data.to_csv("reconstructed.csv", index=False)
 ```
 
-#### **3. Process a Specific Trial**
+#### **3. Process Data from Other Formats**
 ```python
-# Process only Trial 88
-processed_trial = process_pupil(data, trial=88)
-
-# Save the reconstructed trial
-processed_trial.to_csv("trial_88_reconstructed.csv", index=False)
+processed_data = process_pupil("input.parquet")
+processed_data.to_excel("reconstructed.xlsx", index=False)
 ```
 
 #### **4. Plot the Results**
@@ -88,11 +88,11 @@ processed_trial.to_csv("trial_88_reconstructed.csv", index=False)
 import matplotlib.pyplot as plt
 
 plt.figure(figsize=(14, 7))
-plt.plot(processed_trial['Timestamp'], processed_trial['Pupil Size'], label='Original Pupil Size', alpha=0.7)
-plt.plot(processed_trial['Timestamp'], processed_trial['Reconstructed Pupil Size'], label='Reconstructed Pupil Size', linestyle='--')
-plt.xlabel('Timestamp', fontsize=14)
-plt.ylabel('Pupil Size', fontsize=14)
-plt.title('Original vs Reconstructed Pupil Size (Trial 88)', fontsize=16)
+plt.plot(processed_data['Trial Time'], processed_data['Pupil Size'], label='Original Pupil Size (with Blinks)', alpha=0.6)
+plt.plot(processed_data['Trial Time'], processed_data['Reconstructed Pupil Size'], label='Reconstructed Pupil Size', linestyle='--')
+plt.xlabel('Time (ms)', fontsize=14)
+plt.ylabel('Pupil Size (AU)', fontsize=14)
+plt.title('Original vs Reconstructed Pupil Size', fontsize=16)
 plt.legend(fontsize=12)
 plt.grid(True)
 plt.show()
@@ -101,7 +101,7 @@ plt.show()
 ---
 
 ### **Input Requirements**
-The input data must be a Pandas DataFrame or CSV file with the following columns:
+The input data must be in one of the following formats: CSV, Excel, JSON, TXT, or Parquet. It should contain the following columns:
 - **`Trial`**: Identifies the trial number.
 - **`Pupil Size`**: The measured pupil size.
 
@@ -116,25 +116,21 @@ Alternatively, you can replace the original `Pupil Size` column with the reconst
 ### **Advanced Parameters**
 You can customize reconstruction behavior by adjusting the following optional parameters:
 
-- **`trial`**:
-  Specify a trial number to process. If `None`, all trials are processed.
-
 - **`blink_threshold`**:
-  Threshold for detecting blinks. Default is `0` (blinks occur when `Pupil Size` is 0).
+  Threshold for detecting blinks. Default is `1000`.
 
-- **`tau`**:
-  Recovery time constant for logarithmic reconstruction. Default is `50`.
+- **`tau_base`**:
+  Base recovery time constant for logarithmic reconstruction. Default is `50`.
 
 - **`noise_scale`**:
-  Scale of Gaussian noise added to long-blink reconstructions. Default is `0.05`.
+  Scale of Gaussian noise added to reconstructions. Default is `0.05`.
 
 #### Example:
 ```python
 processed_data = process_pupil(
-    data,
-    trial=88,
-    blink_threshold=0,
-    tau=60,
+    "input.json",
+    blink_threshold=1200,
+    tau_base=60,
     noise_scale=0.1
 )
 ```
@@ -163,18 +159,24 @@ We welcome contributions! To contribute:
 
 ### **Example Input and Output**
 #### **Input:**
-| Trial | Timestamp | Pupil Size |
-|-------|-----------|------------|
-| 1     | 0         | 4500       |
-| 1     | 10        | 0          |
-| 1     | 20        | 0          |
-| 1     | 30        | 4800       |
+| Trial | Trial Time | Pupil Size |
+|-------|------------|------------|
+| 1     | 0          | 4500       |
+| 1     | 10         | 0          |
+| 1     | 20         | 0          |
+| 1     | 30         | 4800       |
 
 #### **Output:**
-| Trial | Timestamp | Pupil Size | Reconstructed Pupil Size |
-|-------|-----------|------------|--------------------------|
-| 1     | 0         | 4500       | 4500                    |
-| 1     | 10        | 0          | 4600                    |
-| 1     | 20        | 0          | 4700                    |
-| 1     | 30        | 4800       | 4800                    |
+| Trial | Trial Time | Pupil Size | Reconstructed Pupil Size |
+|-------|------------|------------|--------------------------|
+| 1     | 0          | 4500       | 4500                    |
+| 1     | 10         | 0          | 4600                    |
+| 1     | 20         | 0          | 4700                    |
+| 1     | 30         | 4800       | 4800                    |
 ```
+
+### Key Updates:
+1. **Unified Methodology**: Removed references to distinct handling of short and long blinks.
+2. **File Format Support**: Added examples and documentation for processing multiple file formats.
+3. **Gaussian Noise Model**: Clarified the enhanced noise integration process.
+4. **Updated Changelog**: Documented the new features added in version `1.3.0`.
