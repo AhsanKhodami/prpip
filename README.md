@@ -48,7 +48,7 @@
 - Enhanced the Gaussian noise model for more realistic reconstruction.
 - Optimized compatibility with `pandas` and modern data workflows.
 
-### **Version 1.3.1**
+### **Version 1.3.2**
   This Version is alinged `blink detection` based on (Hershman, 2018) work to have a better detection of blinks
    - A new `smooth` function implements a moving average to reduce noise in the pupil size signal.
    - `monotonically_dec` and `monotonically_inc` arrays are used to refine blink onset (decreasing) and offset (increasing) points.
