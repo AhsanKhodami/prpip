@@ -48,6 +48,16 @@
 - Enhanced the Gaussian noise model for more realistic reconstruction.
 - Optimized compatibility with `pandas` and modern data workflows.
 
+### **Version 1.3.1**
+  This Version is alinged `blink detection` based on (Hershman, 2018) work to have a better detection of blinks
+   - A new `smooth` function implements a moving average to reduce noise in the pupil size signal.
+   - `monotonically_dec` and `monotonically_inc` arrays are used to refine blink onset (decreasing) and offset (increasing) points.
+   - Blinks are identified where pupil size equals zero, using transitions detected via the `diff` function.
+   - Handles blinks at the start or end of the data, ensuring valid onset and offset indices.
+   - Consecutive blinks within `concat_gap_interval` are merged to avoid over-segmentation.
+   - Blink intervals are returned as tuples of start and end indices, refined based on smoothing and monotonicity. 
+
+
 </details>
 
 ---
